@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PetroBalance{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/inventarios/movimientos">Inventarios</a></li>
+        <li><a href="/clientes/">Clientes</a></li>
+        <li><a href="/infrastructura/tanques">Infraestructura</a></li>
+        <li><a href="/reportes/">Reportes</a></li>
+    </ul>
+</nav>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+<footer>PetroBalance &copy; 2025</footer>
+</body>
+</html>
