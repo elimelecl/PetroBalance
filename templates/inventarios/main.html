@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Manager - Sistema de Gestión</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #0f172a;
+      --color-secondary: #1e40af;
+      --color-accent: #059669;
+      --color-background: #f8fafc;
+      --color-surface: #ffffff;
+      --color-light: #e2e8f0;
+      --color-dark: #334155;
+      --color-danger: #dc2626;
+      --color-warning: #d97706;
+      --color-success: #16a34a;
+      --color-info: #0891b2;
+      --gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      --gradient-accent: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--color-background);
+      color: var(--color-dark);
+      line-height: 1.6;
+    }
+
+    /* Enhanced Navigation */
+    nav {
+      background: var(--gradient-primary);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow-lg);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      min-height: 70px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-right: 3rem;
+    }
+
+    .nav-brand .brand-icon {
+      width: 45px;
+      height: 45px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 220px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--color-light);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    .nav-item:hover .nav-dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .nav-dropdown-item {
+      padding: 0.75rem 1.25rem;
+      color: var(--color-dark);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .nav-dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .nav-dropdown-item:hover {
+      background: var(--color-background);
+      color: var(--color-secondary);
+      padding-left: 1.5rem;
+    }
+
+    .nav-dropdown-item:first-child {
+      border-radius: 12px 12px 0 0;
+    }
+
+    .nav-dropdown-item:last-child {
+      border-radius: 0 0 12px 12px;
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-left: auto;
+    }
+
+    .nav-notifications {
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-notifications:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--color-danger);
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .nav-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.5rem;
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .nav-profile:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .profile-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 8px;
+      background: var(--gradient-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    /* Enhanced Header */
+    .page-header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .header-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient-primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.75rem;
+    }
+
+    .header-text h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .header-text p {
+      color: #64748b;
+      font-size: 1rem;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 1rem;
+      background: var(--color-background);
+      border-radius: 12px;
+      min-width: 100px;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-secondary);
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    /* Enhanced Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Enhanced Filters */
+    .filters-section {
+      background: var(--color-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-light);
+    }
+
+    .filters-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .filters-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+
+    .filter-btn {
+      padding: 1rem;
+      border: 2px solid var(--color-light);
+      border-radius: 12px;
+      background: var(--color-surface);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-secondary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .filter-btn.active {
+      background: var(--gradient-primary);
+      border-color: var(--color-secondary);
+      color: white;
+    }
+
+    .filter-btn .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .filter-btn .label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    /* Enhanced Table */
+    .data-section {
+      background: var(--color-surface);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-light);
+    }
+
+    .data-header {
+      background: var(--color-background);
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--color-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .data-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: var(--color-background);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-primary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--color-light);
+    }
+
+    td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    tr:hover {
+      background: var(--color-background);
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-completed { background: #dcfce7; color: var(--color-success); }
+    .status-progress { background: #dbeafe; color: var(--color-info); }
+    .status-pending { background: #fef3c7; color: var(--color-warning); }
+
+    /* Enhanced Action Button */
+    .floating-action {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 100;
+    }
+
+    .new-transaction-btn {
+      background: var(--gradient-accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow-xl);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .new-transaction-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .new-transaction-btn i {
+      font-size: 1.25rem;
+    }
+
+    /* Enhanced Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: var(--color-surface);
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        transform: translateY(30px) scale(0.9);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-header p {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .modal-option {
+      padding: 1.25rem;
+      border: 2px solid var(--color-light);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--color-surface);
+    }
+
+    .modal-option:hover {
+      border-color: var(--color-secondary);
+      background: var(--color-background);
+      transform: translateX(4px);
+    }
+
+    .modal-option-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--color-background);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--color-secondary);
+    }
+
+    .modal-option-text {
+      flex: 1;
+    }
+
+    .modal-option-title {
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-option-desc {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* Form Styles */
+    .form-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--color-surface);
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      animation: slideInUp 0.4s ease-out;
+      border: 1px solid var(--color-light);
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .form-header {
+      background: var(--gradient-primary);
+      color: white;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .form-header .type-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+
+    .form-header h3 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .form-body {
+      padding: 2.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 2px solid var(--color-light);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      background: var(--color-surface);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-secondary);
+      box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--color-light);
+    }
+
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--gradient-accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--color-dark);
+      border: 2px solid var(--color-light);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-light);
+      transform: translateY(-2px);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .nav-container {
+        padding: 0 1rem;
+      }
+      
+      .nav-menu {
+        display: none;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+      }
+      
+      .header-stats {
+        justify-content: center;
+      }
+      
+      .container {
+        padding: 1rem;
+      }
+      
+      .filters {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .floating-action {
+        bottom: 1rem;
+        right: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Enhanced Navigation -->
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="nav-brand">
+        <div class="brand-icon">
+          ⚓
+        </div>
+        <span>Terminal Manager</span>
+      </a>
+      
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a href="#" class="nav-link active">
+            🔄 Movimientos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="../clientes" class="nav-link">
+            👥 Clientes
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            🏭 Infraestructura
+            <span style="margin-left: auto; font-size: 0.75rem;">⬇️</span>
+          </a>
+          <div class="nav-dropdown">
+            <a href="#" class="nav-dropdown-item">
+              🛢️ Tanques de Almacenamiento
+            </a>
+            <a href="#" class="nav-dropdown-item">
+              🧪 Productos Químicos
+            </a>
+            <a href="#" class="nav-dropdown-item">
+              🚛 Medios de Transporte
+            </a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            📊 Reportes
+            <span style="margin-left: auto; font-size: 0.75rem;">⬇️</span>
+          </a>
+          <div class="nav-dropdown">
+            <a href="#" class="nav-dropdown-item">
+              📅 Resumen Diario
+            </a>
+            <a href="#" class="nav-dropdown-item">
+              📈 Volumen por Producto
+            </a>
+            <a href="#" class="nav-dropdown-item">
+              📤 Exportar Datos
+            </a>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            👤 Usuarios
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-user">
+        <button class="nav-notifications">
+          🔔
+          <span class="notification-badge">3</span>
+        </button>
+        <a href="#" class="nav-profile">
+          <div class="profile-avatar">JD</div>
+          <div>
+            <div style="font-size: 0.875rem; font-weight: 600;">Juan Díaz</div>
+            <div style="font-size: 0.75rem; opacity: 0.8;">Administrador</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Enhanced Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <div class="header-icon">
+          🔄
+        </div>
+        <div class="header-text">
+          <h1>Movimientos del Terminal</h1>
+          <p>Gestión y seguimiento de operaciones portuarias</p>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card">
+          <div class="stat-number">24</div>
+          <div class="stat-label">Activas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">156</div>
+          <div class="stat-label">Completadas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">8</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="mainView">
+      <!-- Enhanced Filters -->
+      <div class="filters-section">
+        <div class="filters-header">
+          <div class="filters-title">
+            🔍 Filtrar por Tipo de Operación
+          </div>
+          <button onclick="clearFilters()" style="background: none; border: 1px solid var(--color-light); border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer; color: var(--color-dark);">
+            ❌ Limpiar filtros
+          </button>
+        </div>
+        <div class="filters">
+          <button class="filter-btn" onclick="filter('Carrotanque')">
+            <div class="icon">🚛</div>
+            <div class="label">Carrotanques</div>
+          </button>
+          <button class="filter-btn" onclick="filter('Barcaza')">
+            <div class="icon">🚢</div>
+            <div class="label">Barcazas</div>
+          </button>
+          <button class="filter-btn" onclick="filter('Buque')">
+            <div class="icon">⚓</div>
+            <div class="label">Buques</div>
+          </button>
+          <button class="filter-btn" onclick="filter('Transferencia')">
+            <div class="icon">🔄</div>
+            <div class="label">Transferencias</div>
+          </button>
+          <button class="filter-btn" onclick="filter('Mantenimiento')">
+            <div class="icon">🔧</div>
+            <div class="label">Mantenimiento</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Enhanced Data Table -->
+      <div class="data-section">
+        <div class="data-header">
+          <div class="data-title">
+            📋 Registro de Movimientos
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <button onclick="exportData()" style="background: none; border: 1px solid var(--color-light); border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer;">
+              📥 Exportar
+            </button>
+            <button onclick="refreshData()" style="background: none; border: 1px solid var(--color-light); border-radius: 8px; padding: 0.5rem 1rem; cursor: pointer;">
+              🔄 Actualizar
+            </button>
+          </div>
+        </div>
+        <div class="table-container">
+          <table id="transactionsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Tipo</th>
+                <th>Operación</th>
+                <th>Producto</th>
+                <th>Volumen</th>
+                <th>Inicio</th>
+                <th>Finalización</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-type="Carrotanque">
+                <td><strong>#001</strong></td>
+                <td>PetroCo S.A.</td>
+                <td>Carrotanque</td>
+                <td>Carga</td>
+                <td>Diesel</td>
+                <td>12,000</td>
+                <td>10:00</td>
+                <td>10:45</td>
+                <td><span class="status-badge status-completed">Finalizado</span></td>
+                <td>
+                  <button onclick="editTransaction('#001')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#001')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Barcaza">
+                <td><strong>#002</strong></td>
+                <td>TransMar Ltda.</td>
+                <td>Barcaza</td>
+                <td>Descarga</td>
+                <td>Crudo</td>
+                <td>50,000</td>
+                <td>11:00</td>
+                <td>13:30</td>
+                <td><span class="status-badge status-progress">En Curso</span></td>
+                <td>
+                  <button onclick="editTransaction('#002')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#002')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Buque">
+                <td><strong>#003</strong></td>
+                <td>Naviera Global</td>
+                <td>Buque</td>
+                <td>Carga</td>
+                <td>Gasolina</td>
+                <td>75,000</td>
+                <td>14:00</td>
+                <td>-</td>
+                <td><span class="status-badge status-pending">Pendiente</span></td>
+                <td>
+                  <button onclick="editTransaction('#003')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#003')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Carrotanque">
+                <td><strong>#004</strong></td>
+                <td>Petro Express</td>
+                <td>Carrotanque</td>
+                <td>Descarga</td>
+                <td>Kerosene</td>
+                <td>18,500</td>
+                <td>15:30</td>
+                <td>16:15</td>
+                <td><span class="status-badge status-completed">Finalizado</span></td>
+                <td>
+                  <button onclick="editTransaction('#004')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#004')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Transferencia">
+                <td><strong>#005</strong></td>
+                <td>Terminal Interno</td>
+                <td>Transferencia</td>
+                <td>Transferencia</td>
+                <td>Diesel</td>
+                <td>25,000</td>
+                <td>16:45</td>
+                <td>17:30</td>
+                <td><span class="status-badge status-progress">En Curso</span></td>
+                <td>
+                  <button onclick="editTransaction('#005')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#005')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Barcaza">
+                <td><strong>#006</strong></td>
+                <td>Marítima del Caribe</td>
+                <td>Barcaza</td>
+                <td>Carga</td>
+                <td>Fuel Oil</td>
+                <td>60,000</td>
+                <td>08:00</td>
+                <td>11:00</td>
+                <td><span class="status-badge status-completed">Finalizado</span></td>
+                <td>
+                  <button onclick="editTransaction('#006')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#006')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Mantenimiento">
+                <td><strong>#007</strong></td>
+                <td>Mantenimiento</td>
+                <td>Mantenimiento</td>
+                <td>Pigging</td>
+                <td>Limpieza</td>
+                <td>-</td>
+                <td>18:00</td>
+                <td>-</td>
+                <td><span class="status-badge status-progress">En Curso</span></td>
+                <td>
+                  <button onclick="editTransaction('#007')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#007')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+              <tr data-type="Buque">
+                <td><strong>#008</strong></td>
+                <td>Ocean Freight Co.</td>
+                <td>Buque</td>
+                <td>Descarga</td>
+                <td>Crudo Liviano</td>
+                <td>120,000</td>
+                <td>06:00</td>
+                <td>12:00</td>
+                <td><span class="status-badge status-completed">Finalizado</span></td>
+                <td>
+                  <button onclick="editTransaction('#008')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+                    ✏️
+                  </button>
+                  <button onclick="deleteTransaction('#008')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Form (Hidden by default) -->
+    <div id="transactionForm" class="hidden">
+      <div class="form-container">
+        <div class="form-header">
+          <div class="type-icon" id="formIcon">⚓</div>
+          <h3 id="formTitle">Nueva Operación</h3>
+        </div>
+        <form id="operationForm">
+          <div class="form-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="cliente">Cliente</label>
+                <input type="text" id="cliente" name="cliente" required>
+              </div>
+              <div class="form-group">
+                <label for="tipo">Tipo de Operación</label>
+                <select id="tipo" name="tipo" required onchange="updateFormIcon()">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="Carrotanque">Carrotanque</option>
+                  <option value="Barcaza">Barcaza</option>
+                  <option value="Buque">Buque</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Mantenimiento">Mantenimiento</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="operacion">Operación</label>
+                <select id="operacion" name="operacion" required>
+                  <option value="">Seleccionar operación</option>
+                  <option value="Carga">Carga</option>
+                  <option value="Descarga">Descarga</option>
+                  <option value="Transferencia">Transferencia</option>
+                  <option value="Pigging">Pigging</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="producto">Producto</label>
+                <select id="producto" name="producto" required>
+                  <option value="">Seleccionar producto</option>
+                  <option value="Diesel">Diesel</option>
+                  <option value="Gasolina">Gasolina</option>
+                  <option value="Crudo">Crudo</option>
+                  <option value="Crudo Liviano">Crudo Liviano</option>
+                  <option value="Kerosene">Kerosene</option>
+                  <option value="Fuel Oil">Fuel Oil</option>
+                  <option value="Limpieza">Limpieza</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="volumen">Volumen (Litros)</label>
+                <input type="number" id="volumen" name="volumen" min="0" step="1">
+              </div>
+              <div class="form-group">
+                <label for="horaInicio">Hora de Inicio</label>
+                <input type="time" id="horaInicio" name="horaInicio" required>
+              </div>
+              <div class="form-group">
+                <label for="horaFin">Hora de Finalización</label>
+                <input type="time" id="horaFin" name="horaFin">
+              </div>
+              <div class="form-group">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado" required>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En Curso">En Curso</option>
+                  <option value="Finalizado">Finalizado</option>
+                </select>
+              </div>
+              <div class="form-group full-width">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="cancelForm()">
+                ❌ Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                ✅ Guardar Operación
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for operation type selection -->
+  <div id="operationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Nueva Operación</h2>
+        <p>Selecciona el tipo de operación que deseas registrar</p>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-option" onclick="startNewTransaction('Carrotanque')">
+            <div class="modal-option-icon">🚛</div>
+            <div class="modal-option-text">
+              <div class="modal-option-title">Carrotanque</div>
+              <div class="modal-option-desc">Operaciones con vehículos cisterna</div>
+            </div>
+          </div>
+          <div class="modal-option" onclick="startNewTransaction('Barcaza')">
+            <div class="modal-option-icon">🚢</div>
+            <div class="modal-option-text">
+              <div class="modal-option-title">Barcaza</div>
+              <div class="modal-option-desc">Operaciones con embarcaciones de carga</div>
+            </div>
+          </div>
+          <div class="modal-option" onclick="startNewTransaction('Buque')">
+            <div class="modal-option-icon">⚓</div>
+            <div class="modal-option-text">
+              <div class="modal-option-title">Buque</div>
+              <div class="modal-option-desc">Operaciones con buques de gran tonelaje</div>
+            </div>
+          </div>
+          <div class="modal-option" onclick="startNewTransaction('Transferencia')">
+            <div class="modal-option-icon">🔄</div>
+            <div class="modal-option-text">
+              <div class="modal-option-title">Transferencia</div>
+              <div class="modal-option-desc">Transferencias entre tanques</div>
+            </div>
+          </div>
+          <div class="modal-option" onclick="startNewTransaction('Mantenimiento')">
+            <div class="modal-option-icon">🔧</div>
+            <div class="modal-option-text">
+              <div class="modal-option-title">Mantenimiento</div>
+              <div class="modal-option-desc">Operaciones de mantenimiento y limpieza</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <div class="floating-action">
+    <button class="new-transaction-btn" onclick="openOperationModal()">
+      ➕ Nueva Operación
+    </button>
+  </div>
+
+  <script>
+    let transactionCounter = 9;
+    let currentFilter = null;
+
+    // Open operation type selection modal
+    function openOperationModal() {
+      document.getElementById('operationModal').style.display = 'flex';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('operationModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+      }
+    });
+
+    // Start new transaction with pre-selected type
+    function startNewTransaction(type) {
+      document.getElementById('operationModal').style.display = 'none';
+      document.getElementById('mainView').classList.add('hidden');
+      document.getElementById('transactionForm').classList.remove('hidden');
+      
+      // Pre-fill the form with selected type
+      document.getElementById('tipo').value = type;
+      document.getElementById('formTitle').textContent = `Nueva Operación - ${type}`;
+      updateFormIcon();
+      
+      // Set default estado
+      document.getElementById('estado').value = 'Pendiente';
+    }
+
+    // Update form icon based on selected type
+    function updateFormIcon() {
+      const tipo = document.getElementById('tipo').value;
+      const iconElement = document.getElementById('formIcon');
+      const icons = {
+        'Carrotanque': '🚛',
+        'Barcaza': '🚢',
+        'Buque': '⚓',
+        'Transferencia': '🔄',
+        'Mantenimiento': '🔧'
+      };
+      iconElement.textContent = icons[tipo] || '⚓';
+    }
+
+    // Cancel form and return to main view
+    function cancelForm() {
+      document.getElementById('transactionForm').classList.add('hidden');
+      document.getElementById('mainView').classList.remove('hidden');
+      document.getElementById('operationForm').reset();
+    }
+
+    // Handle form submission
+    document.getElementById('operationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const newId = String(transactionCounter).padStart(3, '0');
+      
+      // Create new row
+      const newRow = document.createElement('tr');
+      newRow.setAttribute('data-type', formData.get('tipo'));
+      
+      const statusClass = {
+        'Pendiente': 'status-pending',
+        'En Curso': 'status-progress',
+        'Finalizado': 'status-completed'
+      };
+      
+      newRow.innerHTML = `
+        <td><strong>#${newId}</strong></td>
+        <td>${formData.get('cliente')}</td>
+        <td>${formData.get('tipo')}</td>
+        <td>${formData.get('operacion')}</td>
+        <td>${formData.get('producto')}</td>
+        <td>${formData.get('volumen') || '-'}</td>
+        <td>${formData.get('horaInicio')}</td>
+        <td>${formData.get('horaFin') || '-'}</td>
+        <td><span class="status-badge ${statusClass[formData.get('estado')]}">${formData.get('estado')}</span></td>
+        <td>
+          <button onclick="editTransaction('#${newId}')" style="background: none; border: none; color: var(--color-secondary); cursor: pointer; margin-right: 0.5rem;" title="Editar">
+            ✏️
+          </button>
+          <button onclick="deleteTransaction('#${newId}')" style="background: none; border: none; color: var(--color-danger); cursor: pointer;" title="Eliminar">
+            🗑️
+          </button>
+        </td>
+      `;
+      
+      // Add to table
+      document.querySelector('#transactionsTable tbody').appendChild(newRow);
+      
+      // Update counter
+      transactionCounter++;
+      
+      // Update stats
+      updateStats();
+      
+      // Return to main view
+      cancelForm();
+      
+      // Show success message
+      alert('✅ Operación registrada exitosamente');
+    });
+
+    // Filter functionality
+    function filter(type) {
+      currentFilter = type;
+      const rows = document.querySelectorAll('#transactionsTable tbody tr');
+      const buttons = document.querySelectorAll('.filter-btn');
+      
+      // Update button states
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.closest('.filter-btn').classList.add('active');
+      
+      // Filter rows
+      rows.forEach(row => {
+        if (row.getAttribute('data-type') === type) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    }
+
+    // Clear filters
+    function clearFilters() {
+      currentFilter = null;
+      const rows = document.querySelectorAll('#transactionsTable tbody tr');
+      const buttons = document.querySelectorAll('.filter-btn');
+      
+      buttons.forEach(btn => btn.classList.remove('active'));
+      rows.forEach(row => row.style.display = '');
+    }
+
+    // Edit transaction
+    function editTransaction(id) {
+      alert(`🔧 Función de edición para transacción ${id} - En desarrollo`);
+    }
+
+    // Delete transaction
+    function deleteTransaction(id) {
+      if (confirm(`❓ ¿Estás seguro de que deseas eliminar la transacción ${id}?`)) {
+        const row = document.querySelector(`tr td strong:contains('${id}')`);
+        if (row) {
+          row.closest('tr').remove();
+          updateStats();
+          alert('🗑️ Transacción eliminada exitosamente');
+        }
+      }
+    }
+
+    // Export data
+    function exportData() {
+      alert('📊 Función de exportación - En desarrollo');
+    }
+
+    // Refresh data
+    function refreshData() {
+      alert('🔄 Datos actualizados');
+    }
+
+    // Update statistics
+    function updateStats() {
+      const rows = document.querySelectorAll('#transactionsTable tbody tr');
+      let activas = 0, completadas = 0, pendientes = 0;
+      
+      rows.forEach(row => {
+        const status = row.querySelector('.status-badge').textContent.trim();
+        if (status === 'En Curso') activas++;
+        else if (status === 'Finalizado') completadas++;
+        else if (status === 'Pendiente') pendientes++;
+      });
+      
+      document.querySelector('.stat-card:nth-child(1) .stat-number').textContent = activas;
+      document.querySelector('.stat-card:nth-child(2) .stat-number').textContent = completadas;
+      document.querySelector('.stat-card:nth-child(3) .stat-number').textContent = pendientes;
+    }
+
+    // Helper function for finding text content
+    (function() {
+      function contains(selector, text) {
+        var elements = document.querySelectorAll(selector);
+        return Array.prototype.filter.call(elements, function(element){
+          return RegExp(text).test(element.textContent);
+        });
+      }
+      
+      // Add contains method to CSS selector
+      if (!document.querySelector.contains) {
+        document.querySelector.contains = contains;
+      }
+    })();
+
+    // Initialize stats on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateStats();
+    });
+  </script>
+</body>
+</html>

@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+from django.urls import reverse_lazy
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-=d2k=z9dbqz9@45@um)lsj5=4i7v@r&=r@54+2d&q$cf2=e4=y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Add your apps here
+    'clientes',
+    'infrastructura',
+    'inventarios',
+    'usuarios',
+
 ]
 
 MIDDLEWARE = [
@@ -49,12 +56,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'p.urls'
+ROOT_URLCONF = 'PetroBalance.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'Templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'p.wsgi.application'
+WSGI_APPLICATION = 'PetroBalance.wsgi.application'
 
 
 # Database
@@ -100,10 +107,21 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+# Email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.office365.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'notificaciones_clio@puertobahia.com.co'
+EMAIL_HOST_PASSWORD = 'Qat01153'
+ERVER_EMAIL = EMAIL_HOST_USER
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+DATETIME_FORMAT = '%d-%m-%Y %H:%M:S'
+
+LANGUAGE_CODE = 'Es-CO'
 
 TIME_ZONE = 'UTC'
 
@@ -114,10 +132,18 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+MEDIA_ROOT = 'static'
+MEDIA_URL = "/media/"
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+LOGIN_REDIRECT_URL = reverse_lazy("home")
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

@@ -1,3 +1,4 @@
 from django.shortcuts import render
 
-# Create your views here.
+def movimientos(request):
+    return render(request, "inventarios/main.html")
